@@ -1,0 +1,3 @@
+qt3d_birds_1
+============
+checking out git ...
