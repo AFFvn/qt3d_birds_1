@@ -40,7 +40,8 @@ QGLSceneNode * Vertex::vertexObject()
     if (!v)
     {
         QGLBuilder build;
-        build << QGLSphere(0.7f);
+      //  build << QGLSphere(0.7f);
+        build << QGLCube(1);
         v = build.finalizedSceneNode();
         v->setObjectName("Vertex Component");
         QGraphicsRotation3D *rot = new QGraphicsRotation3D(v);

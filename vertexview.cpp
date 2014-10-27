@@ -21,6 +21,7 @@ VertexView::VertexView(QWindow * parent)
     m_vertexScene->setEffect(QGL::LitMaterial);
     setTitle(QString("3d Birds Test"));
     dowork();
+   // dowork2();
 }
 
 VertexView::~VertexView()
@@ -42,7 +43,7 @@ void VertexView::paintGL(QGLPainter *painter)
 
 void VertexView::initializeGL(QGLPainter *painter)
 {
-    painter->setClearColor(Qt::black);
+    painter->setClearColor(Qt::white);
     camera()->setEye(camera()->eye() + QVector3D(10.0f, 10.0f, 10.0f));
     glEnable(GL_BLEND);
 }
@@ -85,8 +86,8 @@ void VertexView::buildGrid()
     }
 }
 
-void VertexView::dowork()
-{
+void VertexView::dowork() //initializing sync basic rule
+{ // dimension is hardcoded
     int dim = 50;
     int noofbird = 10000;
     QTime time = QTime::currentTime();
@@ -170,4 +171,70 @@ void VertexView::dowork()
         }
     }
 
+}
+
+void VertexView::dowork2() // initializing async basic rule
+{
+    int dim = 50;
+    int noofbird = 10000;
+
+    QTime time = QTime::currentTime();
+    unsigned long s = time.msec();
+    srand(s);
+    QVector < QVector < QVector< int > > > mainvec(dim,
+                                                   QVector < QVector <int > > (dim,
+                                                                               QVector < int > (dim, 0)));
+    positions = mainvec;
+    positions[dim/2][dim/2][dim/2] = noofbird;
+    while (noofbird != 1)
+    {// loop exactly the numbers of bird
+        // look for next verte
+        async_get_next_v(dim/2, dim/2, dim/2);
+
+        noofbird = positions[dim/2][dim/2][dim/2];
+    }
+
+    for (int i = 0 ; i < dim; i++)
+    {
+        for (int x = 0; x < dim; x++)
+        {
+            for (int y = 0; y < dim; y++)
+            {
+                if (positions[i][x][y] ==1) {
+                Vertex * v = addVertex();
+                v->setPosition(QVector3D(y,x,i));
+                }
+            }
+        }
+    }
+}
+
+void VertexView::async_get_next_v(int z, int y, int x)
+{
+    positions[z][y][x]--;
+    int ran = rand() % 6;
+    if (ran == 0) {// move east
+        positions[z][y+1][x]++;
+        if (positions[z][y+1][x] > 1) {async_get_next_v(z, y+1, x);}
+    }
+    else if (ran == 1) {
+        positions[z][y-1][x]++;
+        if (positions[z][y-1][x] > 1) {async_get_next_v(z, y-1, x);}
+    }
+    else if (ran == 2) {// move north
+        positions[z][y][x+1]++;
+        if (positions[z][y][x+1] > 1) {async_get_next_v(z, y, x+1);}
+    }
+    else if (ran == 3) { // move south
+        positions[z][y][x-1]++;
+        if (positions[z][y][x-1] > 1) {async_get_next_v(z, y, x-1);}
+    }
+    else if (ran == 4) { // move up
+        positions[z+1][y][x]++;
+        if (positions[z+1][y][x] > 1) {async_get_next_v(z+1, y, x);}
+    }
+    else if (ran == 5) { // move down
+        positions[z-1][y][x]++;
+        if (positions[z-1][y][x] > 1) {async_get_next_v(z-1, y, x);}
+    }
 }
